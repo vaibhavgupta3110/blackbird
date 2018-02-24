@@ -54,6 +54,7 @@ quote_t getQuote(Parameters& params)
 
 double getAvail(Parameters &params, std::string currency)
 {
+  currency = symbolTransform(params, currency);
   unique_json root { authRequest(params, "getInfo") };
   auto funds = json_object_get(json_object_get(root.get(), "funds"), currency.c_str());
   return json_number_value(funds);
@@ -87,12 +88,15 @@ bool isOrderComplete(Parameters& params, std::string orderId)
   return json_object_get(root.get(), orderId.c_str()) == nullptr;
 }
 
-double getActivePos(Parameters& params)
+double getActivePos(Parameters& params, std::string orderId)
 {
-  // TODO:
-  // this implementation is more of a placeholder copied from other exchanges;
-  // may not be reliable.
-  return getAvail(params, "btc");
+
+  std::string options = "order_id=";
+  options += orderId;
+  double activeAmt = 0.0;
+  unique_json root { authRequest(params, "OrderInfo", options) };
+  activeAmt = json_number_value(json_object_get(json_object_get(root.get(),orderId.c_str()),"amount"));
+  return activeAmt;
 }
 
 double getLimitPrice(Parameters& params, double volume, bool isBid)
@@ -114,6 +118,17 @@ double getLimitPrice(Parameters& params, double volume, bool isBid)
   return price;
 }
 
+std::string symbolTransform(Parameters& params, std::string leg){
+  std::transform(leg.begin(),leg.end(), leg.begin(), ::toupper);
+  if (leg.compare("BTC")==0){
+    return "BTC";
+  } else if (leg.compare("USD")==0){
+    return "USD"; //WARNING: hard transform usd-> USDT not appropriate for all users
+  } else {
+    *params.logFile << "<BTC-e> WARNING: Currency not supported." << std::endl;
+    return "";
+  }
+}
 /*
  * This is here to handle annoying inconsistences in btce's api.
  * For example, if there are no open orders, the 'ActiveOrders'

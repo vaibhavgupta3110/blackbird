@@ -4,6 +4,61 @@
 <img src="https://cloud.githubusercontent.com/assets/11370278/10808535/02230d46-7dc3-11e5-92d8-da15cae8c6e9.png" width="50%" alt="Blackbird Bitcoin Arbitrage">
 </p>
 
+### Parallelism Branch
+
+__NOTE THAT THIS BRANCH IS UNSTABLE/A WORK IN PROGRESS PROCEED AT YOUR OWN RISK__
+
+__DO NOT RUN THIS BRANCH WITH OUTSTANDING ORDERS FROM MASTER THEY WILL NOT BE IMPORTED__
+
+The known issues are as follows:
+
+1. Balance calculations for printout are incorrect. This should not effect trading.
+
+2. SendEmail is not functioning.
+
+3. Many exchanges do not have "getActivePos" members which conform to the new style. These members must poll the exchange
+with the orderId of the executed trade and return a double type value which represents the amount of the Leg1 currency the trade executed for (sometimes, this is returned as an array of partial fills) so that we know the volume needed to close the trade on exit.
+
+4. _Stop_After_No_Trade_ is currently not implemented.
+
+5. There should be more rigorous controls added to handle disable/enabling of exchanges across sessions, or a new exchangeId regime is needed. Currently, if a user enables/disables exchanges at will with open trades from a previous session the exchangeIds will be wrong and erroneous trades could execute. 
+
+In testing this branch, you should make sure to never disable/enable more exchanges if you have a trade outstanding. Adding getActivePos members would be greatly appreciated. 
+
+You should also note that on this branch, exchanges that do not support BTC/USD instead use BTC/USDT by default.
+
+### Exchanges Implemented on Parallelism Branch
+
+| Exchange | Long | Short | Tested | Note |
+| -------- |:----:|:-----:|:------:| ---- |
+| <a href="https://www.kraken.com" target="_blank">Kraken</a> | ✓ | ✓ | ✓ | Does not display the correct amount of BTC held on margin when starting a sesssion. (does not effect results.) | 
+| <a href="https://www.gdax.com" target="_blank">GDAX</a> | ✓ |  | ✓ | Shorting is not currently supported. |
+| <a href="https://poloniex.com" target="_blank">Poloniex</a> | ✓ | | ✓ | Shorting is not currently supported. BTC/USDT is used. |
+| <a href="https://bittrex.com" target="_blank">Bittrex</a> | ✓ |  | ✓ | BTC/USD not supported (coming soon.) - BTC/USDT used instead. |
+| <a href="https://binance.com" target="_blank">Binance</a> | ✓ |  | ✓ | BTC/USD not supported - BTC/USDT used instead. |
+
+### Exchanges in need of testing
+
+
+| Exchange | Long | Short | Tested | Note |
+| -------- |:----:|:-----:|:------:| ---- |
+| <a href="https://www.bitfinex.com" target="_blank">Bitfinex</a> | ✓ | ✓ | | The getActivePos member has been added and needs testing with an API Key. |
+| <a href="https://www.bitstamp.net" target="_blank">Bitstamp</a> | ✓ |  | | The getActivePos member has been added and needs testing with an API Key. |
+| <a href="https://exmo.com" target="_blank">EXMO</a> | ✓ |  | | New exchange from PR <a href="https://github.com/butor/blackbird/pull/336" target="_blank">#336</a>. <b>Might be a <a href="https://bitcointalk.org/index.php?topic=1919799.0" target="_blank">scam</a></b> |
+| <a href="https://www.quadrigacx.com" target="_blank">QuadrigaCX</a> | ✓ |  |  |
+| <a href="https://gemini.com" target="_blank">Gemini</a> | ✓ |  | | |
+| <a href="https://cex.io/" target="_blank">CEX.IO</a> | ✓ | ✓ | | |
+| <a href="https://btc-e.com" target="_blank">BTC-e</a> | ✓ |  |  |
+| <a href="https://www.okcoin.com" target="_blank">OKCoin</a> | ✓ |  | |their API now offers short selling: <a href="https://www.okcoin.com/about/rest_api.do" target="_blank">link here</a> |
+
+### Exchanges in need of getActivePos members
+
+
+| Exchange | Long | Short | Tested | Note |
+| -------- |:----:|:-----:|:------:| ---- |
+| <a href="https://www.itbit.com" target="_blank">itBit</a> | ✓ |  | Itbit is not implemented. |
+
+
 ### Introduction
 
 Blackbird Bitcoin Arbitrage is a C++ trading system that does automatic long/short arbitrage between Bitcoin exchanges.
@@ -40,6 +95,8 @@ __THE AUTHORS AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESUL
 
 The trade results are stored in CSV files and the detailed activity is stored in log files. New files are created every time Blackbird is started.
 
+Trade results are also stored in a local database file for later reference.
+
 It is possible to automatically stop Blackbird after the next trade has closed by creating, at any time, an empty file named _stop_after_notrade_.
 
 Blackbird uses functions written by <a href="http://www.adp-gmbh.ch/cpp/common/base64.html" target="_blank">René Nyffenegger</a> to encode and decode base64.
@@ -62,10 +119,10 @@ Note: on Bitfinex, your money has to be available on the _Margin_ account.
 | <a href="https://www.okcoin.com" target="_blank">OKCoin</a> | ✓ |  | ✓ |their API now offers short selling: <a href="https://www.okcoin.com/about/rest_api.do" target="_blank">link here</a> |
 | <a href="https://www.bitstamp.net" target="_blank">Bitstamp</a> | ✓ |  | ✓ | |
 | <a href="https://gemini.com" target="_blank">Gemini</a> | ✓ |  | ✓ | |
-| <a href="https://www.kraken.com" target="_blank">Kraken</a> | ✓ |  | | Validation in progress. <a href="https://blog.kraken.com/post/1413/update-on-system-performance-and-upgrade/" target="_blank"> System currently not reliable</a> | 
+| <a href="https://www.kraken.com" target="_blank">Kraken</a> | ✓ | ✓ | | Validation in progress. Shorting is currently in testing | 
 | <a href="https://exmo.com" target="_blank">EXMO</a> | ✓ |  | | New exchange from PR <a href="https://github.com/butor/blackbird/pull/336" target="_blank">#336</a>. <b>Might be a <a href="https://bitcointalk.org/index.php?topic=1919799.0" target="_blank">scam</a></b> |
 | <a href="https://www.quadrigacx.com" target="_blank">QuadrigaCX</a> | ✓ |  |  |
-
+| <a href="https://www.gdax.com" target="_blank">GDAX</a> | ✓ |  |  | Validation in progress. Shorting is not currently supported. |
 
 
 
@@ -75,10 +132,11 @@ Note: on Bitfinex, your money has to be available on the _Margin_ account.
 | Exchange | Long | Short | Note |
 | -------- |:----:|:-----:| ---- |
 | <a href="https://poloniex.com" target="_blank">Poloniex</a> | ✓ | ✓ | BTC/USD trading not supported, BTC/USDT margin trading not supported |
-| <a href="https://www.gdax.com" target="_blank">GDAX</a> | ✓ | ✓ |  |
+| <a href="https://cex.io/" target="_blank">CEX.IO</a> | ✓ | ✓ | Implementation in progress |
 | <a href="https://btc-e.com" target="_blank">BTC-e</a> | ✓ |  |  |
 | <a href="https://www.itbit.com" target="_blank">itBit</a> | ✓ |  |  |
-| <a href="https://cex.io/" target="_blank">CEX.IO</a> | ✓ | ✓ |  |
+| <a href="https://bittrex.com" target="_blank">Bittrex</a> | ✓ |  | Implementation in progress, BTC/USD not supported (coming soon.) |
+| <a href="https://binance.com" target="_blank">Binance</a> | ✓ |  | Implementation in progress, BTC/USD not supported |
 
 If `DemoMode=true`, all the exchanges are shown in the log file.
 

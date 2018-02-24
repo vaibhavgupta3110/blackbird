@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <array>
 #include <chrono>
+#include <algorithm>
 
 namespace Exmo {
 // Forward declarations
@@ -41,7 +42,7 @@ quote_t getQuote(Parameters &params)
 double getAvail(Parameters& params, std::string currency)
 {
   double available = 0.0;
-  transform(currency.begin(), currency.end(), currency.begin(), ::toupper);
+  currency = symbolTransform(params, currency);
   const char * curr_ = currency.c_str();
   
   unique_json root { authRequest(params, "/user_info") };
@@ -113,8 +114,17 @@ bool isOrderComplete(Parameters& params, std::string orderId) {
 }
 
 
-double getActivePos(Parameters& params) {
-  return getAvail(params, "btc");
+double getActivePos(Parameters& params, std::string orderId) {
+  std::string options = "order_id=";
+  options += orderId;
+  unique_json root { authRequest(params,"/user_order_trades",options)};
+  double activeSize = 0.0;
+  auto arrSize = json_array_size(json_object_get(root.get(),"trades"));
+  auto res = json_object_get(root.get(),"trades");
+  for (size_t i = 0; i < arrSize; i++){
+    activeSize += json_number_value(json_object_get(json_array_get(res,i),"quantity"));
+  }
+  return activeSize;
 }
 
 
@@ -182,6 +192,17 @@ std::string getSignature(Parameters& params, std::string msg) {
   return hmac_sha512.hex_digest();
 }
 
+std::string symbolTransform(Parameters& params, std::string leg){
+  std::transform(leg.begin(),leg.end(), leg.begin(), ::toupper);
+  if (leg.compare("BTC")==0){
+    return "BTC";
+  } else if (leg.compare("USD")==0){
+    return "USD";
+  } else {
+    *params.logFile << "<Exmo> WARNING: Currency not supported." << std::endl;
+    return "";
+  }
+}
 
 void testExmo() {
 

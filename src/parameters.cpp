@@ -126,6 +126,7 @@ Parameters::Parameters(std::string fileName) {
   poloniexEnable = getBool(getParameter("PoloniexEnable", configFile));
   gdaxApi = getParameter("GDAXApiKey", configFile);
   gdaxSecret = getParameter("GDAXSecretKey", configFile);
+  gdaxPhrase = getParameter("GDAXPhrase", configFile);
   gdaxFees = getDouble(getParameter("GDAXFees", configFile));
   gdaxEnable = getBool(getParameter("GDAXEnable", configFile));
   quadrigaApi = getParameter("QuadrigaApiKey", configFile);
@@ -137,7 +138,26 @@ Parameters::Parameters(std::string fileName) {
   exmoSecret = getParameter("ExmoSecretKey", configFile);
   exmoFees = getDouble(getParameter("ExmoFees", configFile));
   exmoEnable = getBool(getParameter("ExmoEnable", configFile));
+  cexioClientId = getParameter("CexioClientId", configFile);
+  cexioApi = getParameter("CexioApiKey", configFile);
+  cexioSecret = getParameter("CexioSecretKey", configFile);
+  cexioFees = getDouble(getParameter("CexioFees", configFile));
+  cexioEnable = getBool(getParameter("CexioEnable", configFile));
+  bittrexApi = getParameter("BittrexApiKey", configFile);
+  bittrexSecret = getParameter("BittrexSecretKey", configFile);
+  bittrexFees = getDouble(getParameter("BittrexFees", configFile));
+  bittrexEnable = getBool(getParameter("BittrexEnable", configFile));
+  binanceApi = getParameter("BinanceApiKey", configFile);
+  binanceSecret = getParameter("BinanceSecretKey", configFile);
+  binanceFees = getDouble(getParameter("BinanceFees", configFile));
+  binanceEnable = getBool(getParameter("BinanceEnable", configFile));
 
+  nullLongExchEnable = getBool(getParameter("NullLongExchEnable", configFile));
+  nullLongExchFees = getDouble(getParameter("NullLongExchFees", configFile));
+  nullShortExchEnable = getBool(getParameter("NullShortExchEnable", configFile));
+  nullShortExchFees = getDouble(getParameter("NullShortExchFees", configFile));
+
+  
   sendEmail = getBool(getParameter("SendEmail", configFile));
   senderAddress = getParameter("SenderAddress", configFile);
   senderUsername = getParameter("SenderUsername", configFile);

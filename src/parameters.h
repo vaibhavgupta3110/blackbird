@@ -76,6 +76,7 @@ struct Parameters {
   bool poloniexEnable;
   std::string gdaxApi;
   std::string gdaxSecret;
+  std::string gdaxPhrase;
   double gdaxFees;
   bool gdaxEnable;
   std::string quadrigaApi;
@@ -87,6 +88,26 @@ struct Parameters {
   std::string exmoSecret;
   double exmoFees;
   bool exmoEnable;
+  std::string cexioClientId;
+  std::string cexioApi;
+  std::string cexioSecret;
+  double cexioFees;
+  bool cexioEnable;
+  std::string bittrexApi;
+  std::string bittrexSecret;
+  double bittrexFees;
+  bool bittrexEnable;
+  std::string binanceApi;
+  std::string binanceSecret;
+  double binanceFees;
+  bool binanceEnable;
+
+
+  bool nullLongExchEnable;
+  double nullLongExchFees;
+  bool nullShortExchEnable;
+  double nullShortExchFees;
+  
 
   bool sendEmail;
   std::string senderAddress;

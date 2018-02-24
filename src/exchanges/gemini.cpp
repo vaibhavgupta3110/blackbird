@@ -53,14 +53,10 @@ double getAvail(Parameters& params, std::string currency) {
   double availability = 0.0;
   const char* returnedText;
   std::string currencyAllCaps;
-  if (currency.compare("btc") == 0) {
-    currencyAllCaps = "BTC";
-  } else if (currency.compare("usd") == 0) {
-    currencyAllCaps = "USD";
-  }
+  currency = symbolTransform(params, currency);
   for (size_t i = 0; i < arraySize; i++) {
     std::string tmpCurrency = json_string_value(json_object_get(json_array_get(root.get(), i), "currency"));
-    if (tmpCurrency.compare(currencyAllCaps.c_str()) == 0) {
+    if (tmpCurrency.compare(currency.c_str()) == 0) {
       returnedText = json_string_value(json_object_get(json_array_get(root.get(), i), "amount"));
       if (returnedText != NULL) {
         availability = atof(returnedText);
@@ -95,8 +91,14 @@ bool isOrderComplete(Parameters& params, std::string orderId) {
   return json_is_false(json_object_get(root.get(), "is_live"));
 }
 
-double getActivePos(Parameters& params) {
-  return getAvail(params, "btc");
+double getActivePos(Parameters& params, std::string orderId) {
+  double activePos = 0.0;
+  auto options = "\"order_id\":" + orderId;
+  unique_json root { authRequest(params, "https://api.gemini.com/v1/order/status","order/status", options) };
+  const char * res = json_string_value(json_object_get(root.get(),"executed_amount"));
+  activePos = res ? atof(res) : 0.0;
+  
+  return activePos;
 }
 
 double getLimitPrice(Parameters& params, double volume, bool isBid)
@@ -124,6 +126,18 @@ double getLimitPrice(Parameters& params, double volume, bool isBid)
   }
 
   return p;
+}
+
+std::string symbolTransform(Parameters& params, std::string leg){
+  std::transform(leg.begin(),leg.end(), leg.begin(), ::toupper);
+  if (leg.compare("BTC")==0){
+    return "BTC";
+  } else if (leg.compare("USD")==0){
+    return "USD";
+  } else {
+    *params.logFile << "<Gemini> WARNING: Currency not supported." << std::endl;
+    return "";
+  }
 }
 
 json_t* authRequest(Parameters& params, std::string url, std::string request, std::string options) {
